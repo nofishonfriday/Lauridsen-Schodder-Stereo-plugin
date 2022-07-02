@@ -3,7 +3,7 @@ name: CMake
 on: [push]
 
 env:
-  PROJECT_NAME: Pamplejuce # Must match the JUCE project name from juce_add_plugin
+  PROJECT_NAME: Lauridsen-Schodder-Stereo # Must match the JUCE project name from juce_add_plugin
   BUILD_TYPE: Release
   BUILD_DIR: Builds
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -123,26 +123,26 @@ jobs:
     - name: Download All Artifacts
       uses: actions/download-artifact@v2
   
-    - name: Upload Windows Asset
-      uses: actions/upload-release-asset@v1
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ env.PROJECT_NAME }}-Windows.zip
-        asset_name: ${{ env.PROJECT_NAME }}-Windows.zip
-        asset_content_type: application/zip
+    # - name: Upload Windows Asset
+      # uses: actions/upload-release-asset@v1
+      # with:
+        # upload_url: ${{ steps.create_release.outputs.upload_url }}
+        # asset_path: ./${{ env.PROJECT_NAME }}-Windows.zip
+        # asset_name: ${{ env.PROJECT_NAME }}-Windows.zip
+        # asset_content_type: application/zip
 
-    - name: Upload Linux Asset
-      uses: actions/upload-release-asset@v1
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ env.PROJECT_NAME }}-Linux.zip
-        asset_name: ${{ env.PROJECT_NAME }}-Linux.zip
-        asset_content_type: application/zip
+    # - name: Upload Linux Asset
+      # uses: actions/upload-release-asset@v1
+      # with:
+        # upload_url: ${{ steps.create_release.outputs.upload_url }}
+        # asset_path: ./${{ env.PROJECT_NAME }}-Linux.zip
+        # asset_name: ${{ env.PROJECT_NAME }}-Linux.zip
+        # asset_content_type: application/zip
 
-    - name: Upload MacOS Asset
-      uses: actions/upload-release-asset@v1
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ env.PROJECT_NAME }}-MacOS.zip
-        asset_name: ${{ env.PROJECT_NAME }}-MacOS.zip
-        asset_content_type: application/zip
+    # - name: Upload MacOS Asset
+      # uses: actions/upload-release-asset@v1
+      # with:
+        # upload_url: ${{ steps.create_release.outputs.upload_url }}
+        # asset_path: ./${{ env.PROJECT_NAME }}-MacOS.zip
+        # asset_name: ${{ env.PROJECT_NAME }}-MacOS.zip
+        # asset_content_type: application/zip
