@@ -12,6 +12,7 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
                      #endif
                        )
 {
+    addParameter (delayMS = new juce::AudioParameterInt ("delay", "Delay (MS)", 0.0, 100.0, 10.0));
 }
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
@@ -154,12 +155,14 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 //==============================================================================
 bool AudioPluginAudioProcessor::hasEditor() const
 {
-    return true; // (change this to false if you choose to not supply an editor)
+    // return true; // (change this to false if you choose to not supply an editor)
+    return false;
 }
 
 juce::AudioProcessorEditor* AudioPluginAudioProcessor::createEditor()
 {
-    return new AudioPluginAudioProcessorEditor (*this);
+    // return new AudioPluginAudioProcessorEditor (*this);
+    return nullptr; // GUI-less
 }
 
 //==============================================================================
