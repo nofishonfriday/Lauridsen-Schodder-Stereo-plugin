@@ -12,7 +12,9 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
                      #endif
                        )
 {
-    addParameter (delayMS = new juce::AudioParameterInt ("delay", "Delay (MS)", 0.0, 100.0, 10.0));
+    addParameter (dry = new juce::AudioParameterFloat ("dry", "Dry", 0.0f, 1.0f, 1.0f));
+    addParameter (wet = new juce::AudioParameterFloat ("wet", "Wet", 0.0f, 1.0f, 0.2f));
+    addParameter (delayMS = new juce::AudioParameterInt ("delay", "Delay (MS)", 0, 100, 10));
 }
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
