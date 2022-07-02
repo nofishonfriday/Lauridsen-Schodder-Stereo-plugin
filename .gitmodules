@@ -1,0 +1,7 @@
+[submodule "JUCE"]
+	path = JUCE
+	url = https://github.com/juce-framework/JUCE/
+	branch = develop
+[submodule "clap-juce-extensions"]
+	path = clap-juce-extensions
+	url = https://github.com/free-audio/clap-juce-extensions.git
