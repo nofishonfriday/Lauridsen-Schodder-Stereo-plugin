@@ -105,11 +105,7 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     linear.prepare (spec);
     mixer.prepare (spec);
 
-    for (auto& volume : delayFeedbackVolume)
-        volume.reset (spec.sampleRate, 0.05);
-
     linear.reset();
-    std::fill (lastDelayOutput.begin(), lastDelayOutput.end(), 0.0f);
 }
 
 void AudioPluginAudioProcessor::releaseResources()
@@ -180,14 +176,12 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
         for (size_t sample = 0; sample < input.getNumSamples(); ++sample)
         {
-            auto input = samplesIn[sample] - lastDelayOutput[channel];
+            auto input = samplesIn[sample];
             auto delayAmount = delayValue[channel];
 
             linear.pushSample (int (channel), input);
             linear.setDelay ((float) delayAmount);
             samplesOut[sample] = linear.popSample ((int) channel);
-
-            lastDelayOutput[channel] = samplesOut[sample] * delayFeedbackVolume[channel].getNextValue();
         }
     }
 
@@ -243,14 +237,6 @@ void AudioPluginAudioProcessor::parameterChanged (const String& parameterID, flo
 
     if (parameterID == "MIX")
         mixer.setWetMixProportion (newValue);
-
-    if (parameterID == "FEEDBACK")
-    {
-        const auto feedbackGain = Decibels::decibelsToGain (newValue, -100.0f);
-
-        for (auto& volume : delayFeedbackVolume)
-            volume.setTargetValue (feedbackGain);
-    }
 }
 
 AudioProcessorValueTreeState::ParameterLayout AudioPluginAudioProcessor::createParameters()

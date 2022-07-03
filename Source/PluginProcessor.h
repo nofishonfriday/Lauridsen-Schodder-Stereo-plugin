@@ -46,8 +46,6 @@ private:
     juce::dsp::DryWetMixer<float> mixer;
 
     std::array<float, 2> delayValue { {} };
-    std::array<float, 2> lastDelayOutput;
-    std::array<juce::LinearSmoothedValue<float>, 2> delayFeedbackVolume;
 
     void parameterChanged (const juce::String& parameterID, float newValue) override;
     juce::AudioProcessorValueTreeState::ParameterLayout createParameters();
