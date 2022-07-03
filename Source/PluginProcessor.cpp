@@ -1,6 +1,8 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+using namespace juce;
+
 //==============================================================================
 AudioPluginAudioProcessor::AudioPluginAudioProcessor()
      : AudioProcessor (BusesProperties()
@@ -10,15 +12,18 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
+            ), parameters (*this, nullptr, "Parameters", createParameters())
 {
-    addParameter (dry = new juce::AudioParameterFloat ("dry", "Dry", 0.0f, 1.0f, 1.0f));
-    addParameter (wet = new juce::AudioParameterFloat ("wet", "Wet", 0.0f, 1.0f, 0.2f));
-    addParameter (delayMS = new juce::AudioParameterInt ("delay", "Delay (MS)", 0, 100, 10));
+    parameters.addParameterListener ("RATE", this);
+    parameters.addParameterListener ("FEEDBACK", this);
+    parameters.addParameterListener ("MIX", this);
 }
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
 {
+    parameters.removeParameterListener ("RATE", this);
+    parameters.removeParameterListener ("FEEDBACK", this);
+    parameters.removeParameterListener ("MIX", this);
 }
 
 //==============================================================================
@@ -91,7 +96,20 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    juce::ignoreUnused (sampleRate, samplesPerBlock);
+    juce::dsp::ProcessSpec spec;
+    spec.maximumBlockSize = samplesPerBlock;
+    spec.sampleRate = sampleRate;
+    spec.numChannels = 2;
+
+    // delay.prepare (spec);
+    linear.prepare (spec);
+    mixer.prepare (spec);
+
+    for (auto& volume : delayFeedbackVolume)
+        volume.reset (spec.sampleRate, 0.05);
+
+    linear.reset();
+    std::fill (lastDelayOutput.begin(), lastDelayOutput.end(), 0.0f);
 }
 
 void AudioPluginAudioProcessor::releaseResources()
@@ -140,18 +158,40 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
+    const auto numChannels = jmax (totalNumInputChannels, totalNumOutputChannels);
+
+    auto audioBlock = juce::dsp::AudioBlock<float> (buffer).getSubsetChannelBlock (0, (size_t) numChannels);
+    auto context = juce::dsp::ProcessContextReplacing<float> (audioBlock);
+    const auto& input = context.getInputBlock();
+    const auto& output = context.getOutputBlock();
+
+    mixer.pushDrySamples (input);
+
     // This is the place where you'd normally do the guts of your plugin's
     // audio processing...
     // Make sure to reset the state if your inner loop is processing
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    for (int channel = 0; channel < numChannels; ++channel)
     {
-        auto* channelData = buffer.getWritePointer (channel);
-        juce::ignoreUnused (channelData);
-        // ..do something to the data...
+        auto* samplesIn = input.getChannelPointer (channel);
+        auto* samplesOut = output.getChannelPointer (channel);
+
+        for (size_t sample = 0; sample < input.getNumSamples(); ++sample)
+        {
+            auto input = samplesIn[sample] - lastDelayOutput[channel];
+            auto delayAmount = delayValue[channel];
+
+            linear.pushSample (int (channel), input);
+            linear.setDelay ((float) delayAmount);
+            samplesOut[sample] = linear.popSample ((int) channel);
+
+            lastDelayOutput[channel] = samplesOut[sample] * delayFeedbackVolume[channel].getNextValue();
+        }
     }
+
+    mixer.mixWetSamples (output);
 }
 
 //==============================================================================
@@ -173,14 +213,20 @@ void AudioPluginAudioProcessor::getStateInformation (juce::MemoryBlock& destData
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
-    juce::ignoreUnused (destData);
+    auto state = parameters.copyState();
+    std::unique_ptr<juce::XmlElement> xml (state.createXml());
+    copyXmlToBinary (*xml, destData);
 }
 
 void AudioPluginAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
-    juce::ignoreUnused (data, sizeInBytes);
+    std::unique_ptr<juce::XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
+
+    if (xmlState.get() != nullptr)
+        if (xmlState->hasTagName (parameters.state.getType()))
+            parameters.replaceState (juce::ValueTree::fromXml (*xmlState));
 }
 
 //==============================================================================
@@ -188,4 +234,34 @@ void AudioPluginAudioProcessor::setStateInformation (const void* data, int sizeI
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new AudioPluginAudioProcessor();
+}
+
+void AudioPluginAudioProcessor::parameterChanged (const String& parameterID, float newValue)
+{
+    if (parameterID == "RATE")
+        std::fill (delayValue.begin(), delayValue.end(), newValue / 1000.0 * getSampleRate());
+
+    if (parameterID == "MIX")
+        mixer.setWetMixProportion (newValue);
+
+    if (parameterID == "FEEDBACK")
+    {
+        const auto feedbackGain = Decibels::decibelsToGain (newValue, -100.0f);
+
+        for (auto& volume : delayFeedbackVolume)
+            volume.setTargetValue (feedbackGain);
+    }
+}
+
+AudioProcessorValueTreeState::ParameterLayout AudioPluginAudioProcessor::createParameters()
+{
+    AudioProcessorValueTreeState::ParameterLayout params;
+
+    using Range = NormalisableRange<float>;
+
+    params.add (std::make_unique<AudioParameterFloat> ("RATE", "Rate", 0.01f, 1000.0f, 0));
+    params.add (std::make_unique<AudioParameterFloat> ("FEEDBACK", "Feedback", -100.0f, 0.0f, -100.0f));
+    params.add (std::make_unique<AudioParameterFloat> ("MIX", "Mix", Range { 0.0f, 1.0f, 0.01f }, 0.0f));
+
+    return params;
 }
