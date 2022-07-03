@@ -15,14 +15,12 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
             ), parameters (*this, nullptr, "Parameters", createParameters())
 {
     parameters.addParameterListener ("DELAY", this);
-    parameters.addParameterListener ("FEEDBACK", this);
     parameters.addParameterListener ("MIX", this);
 }
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
 {
     parameters.removeParameterListener ("DELAY", this);
-    parameters.removeParameterListener ("FEEDBACK", this);
     parameters.removeParameterListener ("MIX", this);
 }
 
@@ -101,10 +99,10 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     spec.sampleRate = sampleRate;
     spec.numChannels = 2;
 
-    linear.prepare (spec);
+    delayLine.prepare (spec);
     mixer.prepare (spec);
 
-    linear.reset();
+    delayLine.reset();
 }
 
 void AudioPluginAudioProcessor::releaseResources()
@@ -176,9 +174,15 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
             auto input = samplesIn[sample];
             auto delayAmount = delayValue[channel];
 
-            linear.pushSample (int (channel), input);
-            linear.setDelay ((float) delayAmount);
-            samplesOut[sample] = linear.popSample ((int) channel);
+            // swap l/r
+            if (channel == 0)
+                delayLine.pushSample (1, input);
+            else
+                delayLine.pushSample (0, input * -1.0f); // invert polarity
+
+            delayLine.setDelay ((float) delayAmount);
+
+            samplesOut[sample] = delayLine.popSample ((int) channel);
         }
     }
 
@@ -243,7 +247,6 @@ AudioProcessorValueTreeState::ParameterLayout AudioPluginAudioProcessor::createP
     using Range = NormalisableRange<float>;
 
     params.add (std::make_unique<AudioParameterFloat> ("DELAY", "Delay (MS)", 0.01f, 1000.0f, 10.0)); // TODO: set range for prod.
-    params.add (std::make_unique<AudioParameterFloat> ("FEEDBACK", "Feedback", -100.0f, 0.0f, -100.0f));
     params.add (std::make_unique<AudioParameterFloat> ("MIX", "Mix", Range { 0.0f, 1.0f, 0.01f }, 0.0f));
 
     return params;
