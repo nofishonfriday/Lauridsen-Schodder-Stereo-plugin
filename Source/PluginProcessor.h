@@ -42,7 +42,7 @@ public:
 private:
     static constexpr auto effectDelaySamples = 192000;
     // dsp::DelayLine<float> delay { effectDelaySamples };
-    juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear> delayLine { effectDelaySamples };
+    juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Lagrange3rd> delayLine { effectDelaySamples };
     juce::dsp::DryWetMixer<float> mixer;
 
     std::array<float, 2> delayValue { {} };
