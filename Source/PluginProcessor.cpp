@@ -14,14 +14,14 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
                      #endif
             ), parameters (*this, nullptr, "Parameters", createParameters())
 {
-    parameters.addParameterListener ("RATE", this);
+    parameters.addParameterListener ("DELAY", this);
     parameters.addParameterListener ("FEEDBACK", this);
     parameters.addParameterListener ("MIX", this);
 }
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
 {
-    parameters.removeParameterListener ("RATE", this);
+    parameters.removeParameterListener ("DELAY", this);
     parameters.removeParameterListener ("FEEDBACK", this);
     parameters.removeParameterListener ("MIX", this);
 }
@@ -101,7 +101,6 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     spec.sampleRate = sampleRate;
     spec.numChannels = 2;
 
-    // delay.prepare (spec);
     linear.prepare (spec);
     mixer.prepare (spec);
 
@@ -232,7 +231,7 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 
 void AudioPluginAudioProcessor::parameterChanged (const String& parameterID, float newValue)
 {
-    if (parameterID == "RATE")
+    if (parameterID == "DELAY")
         std::fill (delayValue.begin(), delayValue.end(), newValue / 1000.0 * getSampleRate());
 
     if (parameterID == "MIX")
@@ -245,7 +244,7 @@ AudioProcessorValueTreeState::ParameterLayout AudioPluginAudioProcessor::createP
 
     using Range = NormalisableRange<float>;
 
-    params.add (std::make_unique<AudioParameterFloat> ("RATE", "Rate", 0.01f, 1000.0f, 0));
+    params.add (std::make_unique<AudioParameterFloat> ("DELAY", "Delay (MS)", 0.01f, 1000.0f, 10.0)); // TODO: set range for prod.
     params.add (std::make_unique<AudioParameterFloat> ("FEEDBACK", "Feedback", -100.0f, 0.0f, -100.0f));
     params.add (std::make_unique<AudioParameterFloat> ("MIX", "Mix", Range { 0.0f, 1.0f, 0.01f }, 0.0f));
 
