@@ -114,7 +114,8 @@ set_target_properties(Assets PROPERTIES FOLDER "Targets")
 
 # We'll need to link to these from our plugin as well as our tests
 set(JUCE_DEPENDENCIES
-    juce::juce_audio_utils)
+    juce::juce_audio_utils
+	juce::juce_dsp)
 
 target_compile_definitions("${PROJECT_NAME}"
     PUBLIC

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <juce_audio_processors/juce_audio_processors.h>
+#include <juce_dsp/juce_dsp.h>
 
 class AudioPluginAudioProcessor : public juce::AudioProcessor
 {
@@ -38,5 +39,8 @@ private:
     juce::AudioParameterFloat* dry;
     juce::AudioParameterFloat* wet;
     juce::AudioParameterInt* delayMS;
+
+    static constexpr auto effectDelaySamples = 192000;
+    juce::dsp::DelayLine<float> delay { effectDelaySamples };
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessor)
 };
