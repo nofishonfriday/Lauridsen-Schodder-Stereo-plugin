@@ -43,8 +43,10 @@ private:
     static constexpr auto effectDelaySamples = 192000;
     juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Lagrange3rd> delayLine { effectDelaySamples };
     juce::dsp::DryWetMixer<float> mixer;
+    
 
-    std::array<float, 2> delayValue { {} };
+    float delayValue;
+    bool calledOnce = false;
 
     void parameterChanged (const juce::String& parameterID, float newValue) override;
     juce::AudioProcessorValueTreeState::ParameterLayout createParameters();

@@ -3,6 +3,10 @@
 
 using namespace juce;
 
+// default DSP params
+const float DELAY_DEFAULT_VAL = 25.0f;
+const float MIX_DEFAULT_VAL   = 0.20f; 
+
 //==============================================================================
 AudioPluginAudioProcessor::AudioPluginAudioProcessor()
      : AudioProcessor (BusesProperties()
@@ -103,6 +107,16 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     mixer.prepare (spec);
 
     delayLine.reset();
+
+    // init DSP params on construction
+    // we need sample rate for this, so can't do in constructor (sample rate not known in constr.)
+    if (!calledOnce)
+    {
+        mixer.setWetMixProportion (MIX_DEFAULT_VAL);
+        parameterChanged ("DELAY", DELAY_DEFAULT_VAL);
+
+        calledOnce = true;
+    }    
 }
 
 void AudioPluginAudioProcessor::releaseResources()
@@ -169,7 +183,6 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         for (size_t sample = 0; sample < input.getNumSamples(); ++sample)
         {
             auto input = samplesIn[sample];
-            auto delayAmount = delayValue[channel];
 
             // swap l/r
             if (channel == 0)
@@ -177,7 +190,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
             else
                 delayLine.pushSample (0, input * -1.0f); // invert polarity
 
-            delayLine.setDelay ((float) delayAmount);
+            delayLine.setDelay (delayValue);
 
             samplesOut[sample] = delayLine.popSample ((int) channel);
         }
@@ -231,7 +244,7 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 void AudioPluginAudioProcessor::parameterChanged (const String& parameterID, float newValue)
 {
     if (parameterID == "DELAY")
-        std::fill (delayValue.begin(), delayValue.end(), newValue / 1000.0 * getSampleRate());
+        delayValue = newValue / 1000.0 * getSampleRate();
 
     if (parameterID == "MIX")
         mixer.setWetMixProportion (newValue);
@@ -243,8 +256,8 @@ AudioProcessorValueTreeState::ParameterLayout AudioPluginAudioProcessor::createP
 
     using Range = NormalisableRange<float>;
 
-    params.add (std::make_unique<AudioParameterFloat> ("DELAY", "Delay (MS)", 15.0f, 100.0f, 25.0f));
-    params.add (std::make_unique<AudioParameterFloat> ("MIX", "Mix", Range { 0.0f, 1.0f, 0.01f }, 0.20f));
+    params.add (std::make_unique<AudioParameterFloat> ("DELAY", "Delay (MS)", 15.0f, 100.0f, DELAY_DEFAULT_VAL));
+    params.add (std::make_unique<AudioParameterFloat> ("MIX", "Mix", Range { 0.0f, 1.0f, 0.01f }, MIX_DEFAULT_VAL));
 
     return params;
 }
