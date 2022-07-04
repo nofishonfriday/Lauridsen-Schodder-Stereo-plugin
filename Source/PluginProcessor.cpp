@@ -117,17 +117,14 @@ bool AudioPluginAudioProcessor::isBusesLayoutSupported (const BusesLayout& layou
     juce::ignoreUnused (layouts);
     return true;
   #else
-    // This is the place where you check if the layout is supported.
-    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
-        return false;
-
-    // This checks if the input layout matches the output layout
-   #if ! JucePlugin_IsSynth
-    if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
-        return false;
-   #endif
-
-    return true;
+    // https://forum.juce.com/t/how-to-enable-mono-stereo-option-for-plug-in-within-logic/41545/2
+    if (layouts.getMainOutputChannelSet() == AudioChannelSet::stereo())
+    {
+        // Mono-to-stereo OR stereo-to-stereo
+        if ((layouts.getMainInputChannelSet() == AudioChannelSet::mono()) || (layouts.getMainInputChannelSet() == AudioChannelSet::stereo()))
+            return true;
+    }
+    return false;
   #endif
 }
 
