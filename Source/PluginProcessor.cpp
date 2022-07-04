@@ -231,7 +231,7 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 void AudioPluginAudioProcessor::parameterChanged (const String& parameterID, float newValue)
 {
     if (parameterID == "DELAY")
-        std::fill (delayValue.begin(), delayValue.end(), newValue / 1000 * getSampleRate());
+        std::fill (delayValue.begin(), delayValue.end(), newValue / 1000.0 * getSampleRate());
 
     if (parameterID == "MIX")
         mixer.setWetMixProportion (newValue);
@@ -243,7 +243,7 @@ AudioProcessorValueTreeState::ParameterLayout AudioPluginAudioProcessor::createP
 
     using Range = NormalisableRange<float>;
 
-    params.add (std::make_unique<AudioParameterInt> ("DELAY", "Delay (MS)", 15, 100, 25));
+    params.add (std::make_unique<AudioParameterFloat> ("DELAY", "Delay (MS)", 15.0f, 100.0f, 25.0f));
     params.add (std::make_unique<AudioParameterFloat> ("MIX", "Mix", Range { 0.0f, 1.0f, 0.01f }, 0.20f));
 
     return params;
