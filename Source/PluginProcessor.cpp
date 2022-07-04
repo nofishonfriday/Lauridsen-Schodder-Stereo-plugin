@@ -108,14 +108,14 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
 
     delayLine.reset();
 
-    // init DSP params on construction
+    // init DSP params on first plugin load
     // we need sample rate for this, so can't do in constructor (sample rate not known in constr.)
-    if (!calledOnce)
+    if (!processorParamsInitialized)
     {
         mixer.setWetMixProportion (MIX_DEFAULT_VAL);
         parameterChanged ("DELAY", DELAY_DEFAULT_VAL);
 
-        calledOnce = true;
+        processorParamsInitialized = true;
     }    
 }
 

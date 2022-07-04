@@ -46,7 +46,8 @@ private:
     
 
     float delayValue;
-    bool calledOnce = false;
+
+    bool processorParamsInitialized = false;
 
     void parameterChanged (const juce::String& parameterID, float newValue) override;
     juce::AudioProcessorValueTreeState::ParameterLayout createParameters();
