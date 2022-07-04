@@ -164,10 +164,10 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     auto audioBlock = juce::dsp::AudioBlock<float> (buffer).getSubsetChannelBlock (0, (size_t) numChannels);
     auto context = juce::dsp::ProcessContextReplacing<float> (audioBlock);
-    const auto& input = context.getInputBlock();
+    const auto& inputBlock = context.getInputBlock();
     const auto& output = context.getOutputBlock();
 
-    mixer.pushDrySamples (input);
+    mixer.pushDrySamples (inputBlock);
 
     // This is the place where you'd normally do the guts of your plugin's
     // audio processing...
@@ -177,10 +177,10 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     // interleaved by keeping the same state.
     for (int channel = 0; channel < numChannels; ++channel)
     {
-        auto* samplesIn = input.getChannelPointer (channel);
+        auto* samplesIn = inputBlock.getChannelPointer (channel);
         auto* samplesOut = output.getChannelPointer (channel);
 
-        for (size_t sample = 0; sample < input.getNumSamples(); ++sample)
+        for (size_t sample = 0; sample < inputBlock.getNumSamples(); ++sample)
         {
             auto input = samplesIn[sample];
 
@@ -244,7 +244,7 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 void AudioPluginAudioProcessor::parameterChanged (const String& parameterID, float newValue)
 {
     if (parameterID == "DELAY")
-        delayValue = newValue / 1000.0 * getSampleRate();
+        delayValue = newValue / 1000.0 * (float)getSampleRate();
 
     if (parameterID == "MIX")
         mixer.setWetMixProportion (newValue);
