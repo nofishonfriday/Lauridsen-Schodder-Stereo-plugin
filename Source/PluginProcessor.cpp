@@ -175,13 +175,12 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
-    for (int channel = 0; channel < numChannels; ++channel)
+    for (size_t sample = 0; sample < inputBlock.getNumSamples(); ++sample)
     {
-        auto* samplesIn = inputBlock.getChannelPointer (channel);
-        auto* samplesOut = output.getChannelPointer (channel);
-
-        for (size_t sample = 0; sample < inputBlock.getNumSamples(); ++sample)
+        for (int channel = 0; channel < numChannels; ++channel)
         {
+            auto* samplesIn  = inputBlock.getChannelPointer (channel);
+            auto* samplesOut = output.getChannelPointer (channel);
             auto input = samplesIn[sample];
 
             // swap l/r
@@ -256,7 +255,7 @@ AudioProcessorValueTreeState::ParameterLayout AudioPluginAudioProcessor::createP
 
     using Range = NormalisableRange<float>;
 
-    params.add (std::make_unique<AudioParameterFloat> ("DELAY", "Delay (MS)", 15.0f, 100.0f, DELAY_DEFAULT_VAL));
+    params.add (std::make_unique<AudioParameterFloat> ("DELAY", "Delay (MS)", 5.0f, 100.0f, DELAY_DEFAULT_VAL));
     params.add (std::make_unique<AudioParameterFloat> ("MIX", "Mix", Range { 0.0f, 1.0f, 0.01f }, MIX_DEFAULT_VAL));
 
     return params;
