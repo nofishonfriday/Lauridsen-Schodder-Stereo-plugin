@@ -2,4 +2,4 @@ v0.9 - July 4 2022
   + initial release
   
 v0.9.1 - July 5 2022
-  + changed internal processing, can now do smaller delay times (thanks @JUCE forum)
+  + change internal processing, can now do smaller delay times (thanks @JUCE forum)
