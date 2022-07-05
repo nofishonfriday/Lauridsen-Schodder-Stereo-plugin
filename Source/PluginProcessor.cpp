@@ -243,7 +243,7 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 void AudioPluginAudioProcessor::parameterChanged (const String& parameterID, float newValue)
 {
     if (parameterID == "DELAY")
-        delayValue = newValue / 1000.0 * (float)getSampleRate();
+        delayValue = newValue / float(1000.0 * getSampleRate());
 
     if (parameterID == "MIX")
         mixer.setWetMixProportion (newValue);
