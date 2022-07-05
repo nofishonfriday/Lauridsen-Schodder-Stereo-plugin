@@ -1,9 +1,7 @@
-<!---
-[![CMake](https://github.com/nofishonfriday/Lauridsen-Schodder-Stereo-plugin/actions/workflows/cmake_ctest.yml/badge.svg)](https://github.com/nofishonfriday/Lauridsen-Schodder-Stereo-plugin/actions/workflows/cmake_ctest.yml)
--->
+[![build](https://github.com/nofishonfriday/Lauridsen-Schodder-Stereo-plugin/actions/workflows/cmake_ctest.yml/badge.svg)](https://github.com/nofishonfriday/Lauridsen-Schodder-Stereo-plugin/actions/workflows/cmake_ctest.yml)
 
 ## LauridsenSchodderStereo CLAP plugin
-A simple cross-platform (Win, OSX, Linux)* [CLAP](https://u-he.com/community/clap/) audio plugin which implements the Lauridsen-Schodder 'pseudo stereo' technique. It uses the host's GUI and is mono compatible.  
+A simple cross-platform (Win, MacOS, Linux)* [CLAP](https://u-he.com/community/clap/) audio plugin which implements the Lauridsen-Schodder 'pseudo stereo' technique. It uses the host's GUI and is mono compatible.  
 (Other formats could be built from source, JUCE + CMake based.)
 
 ![plugin_screenshot](plugin_screenshot.jpg)
@@ -18,4 +16,4 @@ When summed to Mono the copies cancel out each other.
 Use at your own risk!
 
 
-*sorry, no ARM builds (yet)
+*sorry, no ARM builds (yet), the MacOS version is currently not signed and not notarized
