@@ -6,3 +6,6 @@ v0.9.1 - July 5 2022
 
 v0.9.2 - August 4 2022
   # use lowercase for milliseconds display (ms) 
+
+v0.9.3 - August 7 2022
+  + fix wrong delay value (delay was much too long), v0.9.1 regression
