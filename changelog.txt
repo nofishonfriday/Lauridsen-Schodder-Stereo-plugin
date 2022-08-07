@@ -4,5 +4,5 @@ v0.9 - July 4 2022
 v0.9.1 - July 5 2022
   + change internal processing, can now do smaller delay times (thanks @JUCE forum)
 
-  v0.9.2 - August 4 2022
+v0.9.2 - August 4 2022
   # use lowercase for milliseconds display (ms) 
