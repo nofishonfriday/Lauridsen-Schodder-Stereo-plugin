@@ -244,8 +244,7 @@ void AudioPluginAudioProcessor::parameterChanged (const String& parameterID, flo
 {
     if (parameterID == "DELAY")
         delayValue = newValue / 1000.0f * (float)getSampleRate();
-
-    if (parameterID == "MIX")
+    else if (parameterID == "MIX")
         mixer.setWetMixProportion (newValue);
 }
 
