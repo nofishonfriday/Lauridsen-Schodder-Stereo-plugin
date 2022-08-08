@@ -7,7 +7,7 @@ A simple cross-platform (Win, MacOS, Linux)* [CLAP](https://u-he.com/community/c
 ![plugin_screenshot](plugin_screenshot.jpg)
 
 Binaries are found under [Releases](https://github.com/nofishonfriday/Lauridsen-Schodder-Stereo-plugin/releases).  
-Current version: v0.9.3 - August 7 2022
+Current version: v0.9.4 - August 8 2022
 
 Implementation is simple: 
 A delayed copy of the left channel is sent to the right channel and v.v., additionally the polarity is flipped on one copy.
