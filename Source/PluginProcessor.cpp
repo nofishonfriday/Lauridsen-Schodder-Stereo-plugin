@@ -256,6 +256,7 @@ AudioProcessorValueTreeState::ParameterLayout AudioPluginAudioProcessor::createP
 
     params.add (std::make_unique<AudioParameterFloat> ("DELAY", "Delay (ms)", 5.0f, 100.0f, DELAY_DEFAULT_VAL));
     params.add (std::make_unique<AudioParameterFloat> ("MIX", "Mix", Range { 0.0f, 1.0f, 0.01f }, MIX_DEFAULT_VAL));
+    params.add (std::make_unique<AudioParameterChoice> ("VERSION", "Version (dummy)", juce::StringArray { JucePlugin_VersionString, "github.com/nofishonfriday" }, 0));
 
     return params;
 }
